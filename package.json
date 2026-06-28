@@ -1,0 +1,27 @@
+{
+  "name": "local-ai-dev-lab",
+  "version": "1.0.0",
+  "description": "A sandbox for building local AI developer tools, starting with Ollama-powered codebase analysis and expanding toward RAG, embeddings, and self-hosted LLM workflows.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "tsx src/index.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JustinThomas2/local-ai-dev-lab.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/JustinThomas2/local-ai-dev-lab/issues"
+  },
+  "homepage": "https://github.com/JustinThomas2/local-ai-dev-lab#readme",
+  "devDependencies": {
+    "@types/node": "^26.0.1",
+    "tsx": "^4.22.4",
+    "typescript": "^6.0.3"
+  }
+}
