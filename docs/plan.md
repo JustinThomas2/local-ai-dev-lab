@@ -188,7 +188,7 @@ The notes should capture:
 
 ## Phase 5: Basic Context Improvements
 
-Status: In Progress
+Status: Done
 
 Goal: improve the quality of file context sent to the model.
 
@@ -207,7 +207,7 @@ This phase should still avoid embeddings and vector search.
 
 ## Phase 6: Embeddings and Retrieval
 
-Status: Not started
+Status: In Progress
 
 Goal: move from “send selected files” to basic retrieval.
 
