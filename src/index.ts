@@ -1,3 +1,5 @@
+import "dotenv/config";
+
 import { readProjectFiles } from "./fileReader";
 import { generateWithOllama } from "./ollamaClient";
 import { buildPrompt } from "./prompt";
