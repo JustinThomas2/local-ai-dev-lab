@@ -19,6 +19,10 @@ export async function generateWithOllama({
     body: JSON.stringify({
       model,
       prompt,
+      options: {
+        temperature: 0.1,
+        num_predict: 300,
+      },
       stream: false,
     }),
   });

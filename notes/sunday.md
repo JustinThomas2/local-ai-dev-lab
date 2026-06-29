@@ -25,3 +25,20 @@ Tradeoffs:
 
 * Local inference keeps project context on the machine and avoids cloud API costs.
 * Local models can be slower or less capable than cloud models, so better context selection will matter in later phases.
+
+Phase 5 update:
+
+Added basic context guardrails.
+
+* Limit how many files and how much file content gets sent to the model.
+* Log selected files so I can see what context the model received.
+* Use question-aware context selection:
+
+  * phase/status questions use planning docs
+  * implementation questions use source files
+  * general questions use a balanced set
+* Added `DEBUG_PROMPT_PATH` to inspect the exact prompt sent to Ollama.
+
+Main lesson:
+
+Context selection matters a lot, but model quality matters too. `llama3.2` proved the pipeline but struggled with structured reasoning. `qwen2.5-coder:7b` handled the same prompts much better.

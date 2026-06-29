@@ -68,6 +68,8 @@ types.ts
 
 Run `npm run check` before finishing code changes.
 
+When changing context selection or prompt behavior, validate the final prompt with `DEBUG_PROMPT_PATH`.
+
 After making changes, summarize:
 
 1. What changed.

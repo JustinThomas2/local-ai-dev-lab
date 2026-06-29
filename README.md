@@ -83,6 +83,16 @@ Ask a custom question:
 npm run dev -- "What TypeScript files make up this assistant?"
 ```
 
+## Debug Prompt
+
+To inspect the exact prompt sent to Ollama, set `DEBUG_PROMPT_PATH`:
+
+```bash
+DEBUG_PROMPT_PATH=tmp/prompt.txt npm run dev -- "What phase is this project in?"
+```
+
+The file is only written when `DEBUG_PROMPT_PATH` is set.
+
 ## Quality Gate
 
 Run the TypeScript and ESLint checks:
