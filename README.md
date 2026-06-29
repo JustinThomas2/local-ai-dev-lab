@@ -12,12 +12,12 @@ The current prototype proves this flow:
 
 ```text
 local files
-  -> selected prompt context
+  -> chunked and embedded retrieval context
   -> local Ollama model
   -> answer
 ```
 
-The model does not know the codebase by default. The CLI reads selected project files, formats them into prompt context, sends that prompt to Ollama through its HTTP API, and prints the generated response.
+The model does not know the codebase by default. The CLI reads useful project files, chunks them, stores chunk embeddings in a local JSON index, retrieves chunks relevant to the question, sends those chunks to Ollama as prompt context, and prints the generated response.
 
 ## Current Tool
 
@@ -27,9 +27,13 @@ It can:
 
 * read useful files from a local project
 * ignore generated folders like `node_modules`, `.git`, `dist`, and `build`
-* build a grounded prompt from local file contents
+* chunk files into small retrieval units
+* embed chunks with Ollama
+* store embeddings in a local JSON index
+* retrieve relevant chunks for a question
+* build a grounded prompt from retrieved context
 * call an Ollama model through `OLLAMA_BASE_URL`
-* answer questions using the provided file context
+* answer questions using retrieved local context
 
 ## Setup
 
@@ -52,6 +56,8 @@ Example `.env`:
 ```env
 OLLAMA_BASE_URL=http://127.0.0.1:11434
 OLLAMA_MODEL=llama3.2
+OLLAMA_EMBED_MODEL=nomic-embed-text
+RETRIEVAL_INDEX_PATH=tmp/retrieval-index.json
 ```
 
 When running the CLI from WSL while Ollama is running on Windows, `localhost` may not point to the Windows Ollama server. In that case, get the Windows host IP from WSL:
@@ -65,9 +71,14 @@ Then use that IP in `.env`:
 ```env
 OLLAMA_BASE_URL=http://<windows-host-ip>:11434
 OLLAMA_MODEL=llama3.2
+OLLAMA_EMBED_MODEL=nomic-embed-text
 ```
 
-Ollama must be running before starting the CLI.
+Ollama must be running before starting the CLI. The embedding model must also be available locally, for example:
+
+```bash
+ollama pull nomic-embed-text
+```
 
 ## Run
 
@@ -93,6 +104,18 @@ DEBUG_PROMPT_PATH=tmp/prompt.txt npm run dev -- "What phase is this project in?"
 
 The file is only written when `DEBUG_PROMPT_PATH` is set.
 
+## Retrieval Settings
+
+The assistant stores embeddings in `tmp/retrieval-index.json` by default. It rebuilds the index when useful file contents, the embedding model, or chunk settings change.
+
+Optional settings:
+
+```env
+CHUNK_SIZE_LINES=80
+CHUNK_OVERLAP_LINES=12
+RETRIEVED_CHUNKS=6
+```
+
 ## Quality Gate
 
 Run the TypeScript and ESLint checks:
@@ -103,10 +126,10 @@ npm run check
 
 ## Current Limitations
 
-The assistant sends selected file contents directly in the prompt. It does not yet use embeddings, vector search, chunking, source citations, agents, tool calling, or a UI.
+The assistant uses basic JSON-backed retrieval, not a production vector database. It does not yet include source citations, agents, tool calling, auth, or a UI.
 
-This means answer quality depends heavily on which files are selected and how much relevant context fits into the prompt.
+This means answer quality depends on chunk size, embedding quality, and whether the relevant chunks rank highly enough to fit into the prompt.
 
 ## Future Phases
 
-Future phases will improve context selection, add retrieval with embeddings, make answers traceable to source files, and compare local runtime options like Ollama, llama.cpp, vLLM, and cloud APIs.
+Future phases will make retrieved answers traceable to source files and compare local runtime options like Ollama, llama.cpp, vLLM, and cloud APIs.
