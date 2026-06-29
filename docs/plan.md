@@ -96,7 +96,7 @@ The model does not know about Ollama, the local machine, or the current project 
 
 ## Phase 3: Tiny Codebase Assistant
 
-Status: In progress
+Status: Done
 
 Goal: build the smallest useful codebase assistant slice.
 
