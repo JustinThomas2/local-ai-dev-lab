@@ -66,6 +66,8 @@ types.ts
 
 ## Before Finishing
 
+Run `npm run check` before finishing code changes.
+
 After making changes, summarize:
 
 1. What changed.

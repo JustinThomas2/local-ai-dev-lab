@@ -4,7 +4,10 @@
   "description": "A sandbox for building local AI developer tools, starting with Ollama-powered codebase analysis and expanding toward RAG, embeddings, and self-hosted LLM workflows.",
   "type": "module",
   "scripts": {
-    "dev": "tsx src/index.ts"
+    "dev": "tsx src/index.ts",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "check": "npm run typecheck && npm run lint"
   },
   "repository": {
     "type": "git",
@@ -18,9 +21,13 @@
   },
   "homepage": "https://github.com/JustinThomas2/local-ai-dev-lab#readme",
   "devDependencies": {
+    "@eslint/js": "^9.38.0",
     "@types/node": "^26.0.1",
+    "eslint": "^9.38.0",
+    "globals": "^16.4.0",
     "tsx": "^4.22.4",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.62.0"
   },
   "dependencies": {
     "dotenv": "^17.4.2"
