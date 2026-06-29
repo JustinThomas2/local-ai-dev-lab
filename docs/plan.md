@@ -166,7 +166,7 @@ Avoid in this phase:
 
 ## Phase 4: README and Notes
 
-Status: Not started
+Status: Done
 
 Goal: document what exists clearly enough that someone else can understand the project.
 
@@ -188,7 +188,7 @@ The notes should capture:
 
 ## Phase 5: Basic Context Improvements
 
-Status: Not started
+Status: In Progress
 
 Goal: improve the quality of file context sent to the model.
 
