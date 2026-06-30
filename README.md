@@ -121,6 +121,12 @@ RETRIEVED_CHUNKS=6
 
 Phase 8 tracks runtime tradeoffs in [docs/runtime-comparisons.md](docs/runtime-comparisons.md). The assistant still uses Ollama as its only implemented runtime while other options are compared on setup, API ergonomics, model support, speed, hardware needs, deployment story, and fit for internal developer tools.
 
+## Planning
+
+The active plan lives in [docs/plan.md](docs/plan.md). Completed planning arcs are archived under [docs/plans/](docs/plans/), starting with [docs/plans/01-foundation.md](docs/plans/01-foundation.md).
+
+The current direction is to make the assistant repo-agnostic and more useful against other local repositories before adding agent behavior.
+
 ## Quality Gate
 
 Run the TypeScript and ESLint checks:
@@ -137,4 +143,4 @@ Sources are the retrieved chunks sent to the model, not proof that every listed 
 
 ## Future Phases
 
-Future phases will decide which developer-tool direction this sandbox should pursue next.
+Future phases will improve multi-repo usage, retrieval quality, answer structure, lightweight evaluations, and model/runtime learning through the assistant workflow.

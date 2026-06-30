@@ -1,322 +1,175 @@
-# Local AI Dev Lab Plan
+# Local AI Dev Lab Active Plan
 
-This repo is a local AI developer tooling sandbox. The goal is to explore self-hosted LLM workflows, local inference, codebase understanding, embeddings, RAG, and internal developer productivity tools.
+This is the current source of truth for project direction, sequencing, and scope.
 
-The project is intentionally built in small phases. Each phase should prove one concept without overbuilding.
+The completed first planning arc is archived in [docs/plans/01-foundation.md](plans/01-foundation.md). That arc proved a local codebase assistant using Ollama, local generation, local embeddings, chunked retrieval, source output, and runtime tradeoff documentation.
 
-## Project Goal
+## Current Purpose
 
-Build a small, credible foundation that proves:
+This project is a local AI developer tooling sandbox.
 
-```text
-local files
-  -> selected context
-  -> local/self-hosted LLM
-  -> useful answer
-```
+The next phase arc has two connected goals:
 
-The first version is not meant to be a polished product. It is meant to show that local inference is running, callable from code, and extendable into a codebase assistant.
+* keep learning local/self-hosted LLM workflows through a real application
+* evolve the repo-aware assistant into a useful developer tool that can scan and answer questions about other local repositories
 
-## Current Architecture
+The assistant is the test application for the infrastructure learning. Runtime and model work should support better codebase answers, not become abstract benchmarking.
 
-```text
-local-ai-dev-lab/
-  README.md
-  PLAN.md
-  notes/
-    sunday.md
-  experiments/
-    ollama/
-  projects/
-    codebase-assistant/
-```
+## What Has Been Proven
 
-## Phase 1: Setup
-
-Status: Done
-
-Goal: create the repo structure and install the first local inference runtime.
-
-What this phase proves:
-
-* The repo exists as a public sandbox.
-* Ollama is installed locally.
-* The project has a basic structure for notes, experiments, and small tooling projects.
-
-Current setup:
-
-* Ollama is installed natively on Windows.
-* Development happens inside WSL.
-* The first local model is `llama3.2`.
-
-## Phase 2: Local Inference
-
-Status: Done
-
-Goal: prove that a local model can be called through an HTTP API.
-
-What this phase proves:
-
-* A local model can run through Ollama.
-* Ollama exposes an HTTP API.
-* A client running in WSL can call Ollama running on Windows.
-* The model can return generated text from a local inference request.
-
-Current setup:
-
-* Ollama runs natively on Windows.
-* Development happens inside WSL.
-* WSL discovers the Windows host IP with:
-
-```bash
-ip route | awk '/default/ {print $3; exit}'
-```
-
-Example API base URL:
+The project currently proves this flow:
 
 ```text
-http://<windows-host-ip>:11434
+local project files
+  -> useful file selection
+  -> chunked retrieval
+  -> local embeddings
+  -> local Ollama generation
+  -> answer with source output
 ```
 
-Example request:
+The foundation also documented practical runtime tradeoffs for Ollama, llama.cpp, vLLM, and cloud APIs in [docs/runtime-comparisons.md](runtime-comparisons.md). Ollama remains the only implemented runtime.
 
-```bash
-WINDOWS_HOST=$(ip route | awk '/default/ {print $3; exit}')
+## Active Direction
 
-curl "http://$WINDOWS_HOST:11434/api/generate" -d '{
-  "model": "llama3.2",
-  "prompt": "Say hello from local Ollama.",
-  "stream": false
-}'
-```
+Make the assistant repo-agnostic and more useful before adding agent behavior.
 
-Key lesson:
+Near-term success means the CLI can be pointed at another local repo, build or reuse the right index for that repo, retrieve relevant context, and answer real developer questions with clear source output.
 
-The model does not know about Ollama, the local machine, or the current project by default. The application must provide relevant context in the prompt.
+The strongest product direction is still local codebase Q&A evolving into an architecture explainer. Onboarding help, dependency boundary explanation, migration planning, and PR review can come later once the core retrieval answers are more reliable.
 
-## Phase 3: Tiny Codebase Assistant
-
-Status: Done
-
-Goal: build the smallest useful codebase assistant slice.
-
-What this phase should prove:
-
-* The app can read files from a local project.
-* The app can ignore irrelevant folders like `node_modules`, `.git`, `dist`, and `build`.
-* The app can build a prompt using selected file contents.
-* The app can send that prompt to Ollama.
-* The app can answer a question using local codebase context.
-
-Minimum success:
-
-```text
-local files
-  -> prompt context
-  -> Ollama
-  -> answer
-```
-
-Initial target question:
-
-```text
-Summarize what this project does based only on the provided files.
-```
-
-Planned source structure:
-
-```text
-projects/codebase-assistant/src/
-  index.ts
-  fileReader.ts
-  prompt.ts
-  ollamaClient.ts
-  types.ts
-```
-
-Responsibilities:
-
-```text
-fileReader.ts
-  Reads useful project files.
-
-prompt.ts
-  Formats files and questions into a model prompt.
-
-ollamaClient.ts
-  Calls the Ollama HTTP API.
-
-index.ts
-  Wires the flow together.
-
-types.ts
-  Stores shared TypeScript types.
-```
-
-Avoid in this phase:
-
-* embeddings
-* vector databases
-* agents
-* tool calling
-* UI
-* auth
-* complex chunking
-* source citations
-
-## Phase 4: README and Notes
-
-Status: Done
-
-Goal: document what exists clearly enough that someone else can understand the project.
-
-The README should explain:
-
-* what the project is
-* why local AI developer tooling is useful
-* how Ollama is being used
-* how to run the codebase assistant
-* what the current limitations are
-* what future phases will add
-
-The notes should capture:
-
-* setup decisions
-* WSL and Windows networking lessons
-* model behavior observations
-* tradeoffs between local inference and cloud APIs
-
-## Phase 5: Basic Context Improvements
-
-Status: Done
-
-Goal: improve the quality of file context sent to the model.
-
-Possible improvements:
-
-* limit file count
-* limit file size
-* prioritize README and source files
-* skip binary files
-* add basic chunking
-* improve prompt formatting
-* include file paths clearly
-* ask the model to say when information is missing
-
-This phase should still avoid embeddings and vector search.
-
-## Phase 6: Embeddings and Retrieval
-
-Status: Done
-
-Goal: move from “send selected files” to basic retrieval.
-
-What this phase should prove:
-
-* files can be chunked
-* chunks can be embedded
-* embeddings can be stored
-* a user question can retrieve relevant chunks
-* only relevant context is sent to the model
-
-Possible storage options:
-
-* JSON file
-* SQLite
-* Chroma
-* pgvector
-
-Possible embedding options:
-
-* Ollama embeddings
-* sentence-transformers
-* cloud embedding API for comparison
-
-## Phase 7: Source Citations
-
-Status: Done
-
-Goal: make answers traceable back to source files.
-
-What this phase should prove:
-
-* the assistant can cite which files informed its answer
-* answers are easier to trust
-* hallucinations are easier to detect
-
-Example output:
-
-```text
-This project is a local AI developer tooling sandbox focused on Ollama and codebase understanding.
-
-Sources:
-- README.md
-- notes/sunday.md
-- projects/codebase-assistant/src/index.ts
-```
-
-## Phase 8: Runtime Comparisons
-
-Status: Done
-
-Goal: compare Ollama with other inference/runtime options.
-
-Possible comparisons:
-
-* Ollama
-* llama.cpp
-* vLLM
-* cloud APIs
-
-Compare on:
-
-* setup complexity
-* API ergonomics
-* model support
-* speed
-* hardware requirements
-* deployment story
-* fit for internal developer tools
-
-## Phase 9: Developer Tooling Direction
+## Current Phase: Repo-Agnostic Assistant
 
 Status: In Progress
 
-Goal: decide what this sandbox could become as a more complete internal developer tool.
+Goal: make the assistant work reliably against local repositories other than this one.
 
-Possible directions:
+This phase should answer:
 
-* codebase Q&A assistant
-* architecture explainer
-* onboarding assistant
-* PR review helper
-* dependency boundary explainer
-* migration planning assistant
-* internal docs assistant
+* How does a user point the assistant at another repo?
+* Where does each repo's retrieval index live?
+* How does the assistant avoid mixing context from different repos?
+* What docs and examples make the workflow obvious?
 
-The project should remain focused on local/self-hosted AI workflows and developer productivity.
+Expected work:
 
-## Current Constraints
+* document the intended `PROJECT_ROOT` workflow
+* improve index handling for multiple local repos
+* make stale or mismatched indexes easy to understand
+* validate with at least one real question against another local repo when practical
 
-This repo should stay intentionally small.
+## Next Major Phases
 
-Avoid overbuilding early with:
+### Phase 1: Repo-Agnostic Usage
 
-* Dockerized Ollama
-* Kubernetes
+Make the assistant easy to run against other local repositories.
+
+Possible improvements:
+
+* document examples for `PROJECT_ROOT`
+* make command output clearly show which repo is being read
+* validate against at least one repo outside `local-ai-dev-lab`
+
+### Phase 2: Multi-Repo Index Handling
+
+Make retrieval storage safe and predictable across multiple repos.
+
+Possible improvements:
+
+* derive default index paths from the target repo
+* include repo identity in index metadata
+* make rebuild reasons visible
+* prevent accidental context mixing between repos
+* keep JSON storage unless it becomes a real limitation
+
+### Phase 3: Lightweight Evals
+
+Create a small set of real questions that can be reused across retrieval, prompt, and model changes.
+
+The goal is not formal benchmarking. The goal is to compare changes against the same questions so regressions are visible.
+
+Possible improvements:
+
+* store a short list of representative questions
+* define expected answer traits instead of exact golden text
+* run the same questions after retrieval or prompt changes
+* run the same questions when swapping Ollama models
+* record notes about retrieval misses, unclear answers, and useful source output
+
+Good initial questions:
+
+* What does this repo do?
+* How is retrieval implemented?
+* Where does the assistant call the model?
+* What are the main architectural boundaries?
+* What information is missing from the current context?
+
+### Phase 4: Retrieval Quality and Answer Structure
+
+Improve answer usefulness before adding new capabilities.
+
+Possible improvements:
+
+* tune chunk size and overlap based on real questions
+* improve prompts for architecture, onboarding, and implementation questions
+* separate strong source evidence from weak retrieval matches
+* make answers clearer about missing context
+
+### Phase 5: Runtime and Model Learning Through the Assistant
+
+Use the assistant workflow to learn local/self-hosted model behavior.
+
+Possible work:
+
+* swap Ollama generation models against the same eval questions
+* compare embedding model behavior when there is a clear retrieval question
+* document behavior differences between local models on the same questions
+* document setup friction and model-specific limitations
+* test llama.cpp or vLLM only when there is a concrete reason, such as model format control, CPU behavior, throughput, or serving constraints that Ollama does not answer
+* record setup friction, answer quality observations, and hardware/runtime constraints
+
+Do not make benchmarking claims without real measurements.
+
+### Phase 6: Planning and Patch Suggestions
+
+Only after the assistant is reliable for repo Q&A, consider developer workflows that move toward coding-agent behavior.
+
+Possible later capabilities:
+
+* change planning
+* patch suggestions
+* risk summaries
+* PR review support
+
+These should remain suggestions first. Direct file editing, commits, PR creation, and autonomous agent behavior are out of scope until explicitly planned.
+
+## Constraints
+
+Keep the repo intentionally small and practical.
+
+Do not build yet:
+
+* autonomous agents
+* direct file editing
+* automatic commits
+* PR creation
+* UI
 * auth
-* agents
-* complex UI
-* multi-model benchmarking
-* advanced orchestration
-* production deployment work
+* production deployment
+* Kubernetes
+* vector databases
+* multi-runtime abstraction before a second runtime is actually tested
+* benchmark claims without real measurements
 
-The near-term goal is understanding and proving the workflow, not building a finished product.
+## Validation
 
-## Monday Outreach Angle
+For docs-only changes, `npm run check` is optional.
 
-Once the foundation exists, this is the honest summary:
+For changes to retrieval, chunking, embeddings, prompts, model calls, or CLI behavior:
 
-```text
-I started building a local AI developer tooling sandbox focused on codebase understanding. Right now I have local inference running through Ollama and I’m working toward a small codebase assistant that can ingest project files and answer architectural questions. It got me thinking more seriously about self-hosted LLM workflows and internal dev tools.
+```bash
+npm run check
+npm run dev -- "What phase is this project currently on?"
 ```
+
+When changing assistant behavior, also validate with at least one real question that matches the current phase.
