@@ -170,7 +170,7 @@ This project is a local AI developer tooling sandbox focused on Ollama and codeb
 
 Sources:
 - README.md
-- notes/sunday.md
+- notes/2026-06-28.md
 - src/index.ts
 ```
 
