@@ -234,7 +234,7 @@ Possible embedding options:
 
 ## Phase 7: Source Citations
 
-Status: In Progress
+Status: Done
 
 Goal: make answers traceable back to source files.
 
@@ -257,7 +257,7 @@ Sources:
 
 ## Phase 8: Runtime Comparisons
 
-Status: Not started
+Status: In Progress
 
 Goal: compare Ollama with other inference/runtime options.
 
