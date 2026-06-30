@@ -4,7 +4,23 @@ import type { ProjectFile } from "./types";
 
 const maxFileBytes = 20_000;
 
-const ignoredDirectories = new Set([".git", "node_modules", "dist", "build", "tmp"]);
+const ignoredDirectories = new Set([
+  ".angular",
+  ".cache",
+  ".git",
+  ".gradle",
+  ".idea",
+  ".mvn",
+  ".next",
+  ".turbo",
+  "build",
+  "coverage",
+  "dist",
+  "node_modules",
+  "out",
+  "target",
+  "tmp",
+]);
 
 const ignoredFiles = new Set([
   "agents.md",
