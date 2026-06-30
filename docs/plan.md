@@ -257,7 +257,7 @@ Sources:
 
 ## Phase 8: Runtime Comparisons
 
-Status: In Progress
+Status: Done
 
 Goal: compare Ollama with other inference/runtime options.
 
@@ -280,7 +280,7 @@ Compare on:
 
 ## Phase 9: Developer Tooling Direction
 
-Status: Not started
+Status: In Progress
 
 Goal: decide what this sandbox could become as a more complete internal developer tool.
 
