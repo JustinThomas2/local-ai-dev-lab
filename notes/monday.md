@@ -1,0 +1,26 @@
+# Monday Notes
+
+Good progress today.
+
+The project has moved past the first foundation arc. The old plan is archived under `docs/plans/01-foundation.md`, and `docs/plan.md` is now the active plan again.
+
+Current direction:
+
+Build a repo-aware local AI developer assistant. The assistant is also the test app for learning self-hosted/local LLM workflows.
+
+Key decisions:
+
+* Use CLI flags for per-run inputs like `--repo`, not changing env vars.
+* Keep env vars for stable machine config like Ollama URL and model defaults.
+* Keep the project read-only for now. No agents, file editing, commits, PRs, UI, or auth yet.
+* Evals should come before serious model/runtime comparisons.
+
+What we learned:
+
+Running against `Keep-In-Touch` exposed real repo-agnostic issues. The assistant indexed build/cache files like `target/` and `.angular/cache/`, so file traversal needs stronger ignore rules.
+
+Also, local `.env` still had `RETRIEVAL_INDEX_PATH`, which overrides the new repo-specific index behavior.
+
+Next session:
+
+1. Start Phase 3: Lightweight Evals.
