@@ -19,10 +19,21 @@ const defaultChunkSizeLines = 80;
 const defaultChunkOverlapLines = 12;
 const defaultRetrievedChunks = 6;
 
+type CliOptions = {
+  repo?: string;
+  model?: string;
+  embedModel?: string;
+  debugPrompt?: string;
+  chunks?: string;
+  question: string;
+};
+
 async function main(): Promise<void> {
-  const projectRoot = normalizeProjectRoot(process.env.PROJECT_ROOT);
-  const model = process.env.OLLAMA_MODEL ?? "llama3.2";
-  const embeddingModel = process.env.OLLAMA_EMBED_MODEL ?? defaultEmbeddingModel;
+  const cliOptions = parseCliOptions(process.argv.slice(2));
+  const projectRoot = normalizeProjectRoot(cliOptions.repo ?? process.env.PROJECT_ROOT);
+  const model = cliOptions.model ?? process.env.OLLAMA_MODEL ?? "llama3.2";
+  const embeddingModel =
+    cliOptions.embedModel ?? process.env.OLLAMA_EMBED_MODEL ?? defaultEmbeddingModel;
   const baseUrl = getOllamaBaseUrl();
   const repositoryId = getRepositoryId(projectRoot);
   const indexPath = getRetrievalIndexPath(projectRoot, repositoryId);
@@ -31,8 +42,13 @@ async function main(): Promise<void> {
     "CHUNK_OVERLAP_LINES",
     defaultChunkOverlapLines,
   );
-  const retrievedChunks = getPositiveIntegerEnv("RETRIEVED_CHUNKS", defaultRetrievedChunks);
-  const question = process.argv.slice(2).join(" ").trim() || defaultQuestion;
+  const retrievedChunks = getPositiveIntegerValue(
+    "RETRIEVED_CHUNKS",
+    cliOptions.chunks ?? process.env.RETRIEVED_CHUNKS,
+    defaultRetrievedChunks,
+  );
+  const question = cliOptions.question || defaultQuestion;
+  const debugPromptPath = cliOptions.debugPrompt ?? process.env.DEBUG_PROMPT_PATH;
 
   if (chunkOverlapLines >= chunkSizeLines) {
     throw new Error("CHUNK_OVERLAP_LINES must be less than CHUNK_SIZE_LINES.");
@@ -70,7 +86,7 @@ async function main(): Promise<void> {
   }
 
   const prompt = buildPrompt(chunksToPromptFiles(retrievalResults), question);
-  await writeDebugPrompt(prompt);
+  await writeDebugPrompt(prompt, debugPromptPath);
   const answer = await generateWithOllama({ baseUrl, model, prompt });
 
   console.log(`Model: ${model}`);
@@ -81,8 +97,7 @@ async function main(): Promise<void> {
   console.log(formatSources(retrievalResults));
 }
 
-async function writeDebugPrompt(prompt: string): Promise<void> {
-  const debugPromptPath = process.env.DEBUG_PROMPT_PATH;
+async function writeDebugPrompt(prompt: string, debugPromptPath: string | undefined): Promise<void> {
   if (!debugPromptPath) {
     return;
   }
@@ -106,6 +121,54 @@ function getOllamaBaseUrl(): string {
 
 function normalizeProjectRoot(projectRoot: string | undefined): string {
   return path.resolve(projectRoot ?? process.cwd());
+}
+
+function parseCliOptions(args: string[]): CliOptions {
+  const options: Omit<CliOptions, "question"> = {};
+  const positional: string[] = [];
+
+  for (let index = 0; index < args.length; index += 1) {
+    const arg = args[index];
+
+    if (!arg?.startsWith("--")) {
+      if (arg) {
+        positional.push(arg);
+      }
+      continue;
+    }
+
+    const value = args[index + 1];
+    if (!value || value.startsWith("--")) {
+      throw new Error(`${arg} requires a value.`);
+    }
+
+    switch (arg) {
+      case "--repo":
+        options.repo = value;
+        break;
+      case "--model":
+        options.model = value;
+        break;
+      case "--embed-model":
+        options.embedModel = value;
+        break;
+      case "--debug-prompt":
+        options.debugPrompt = value;
+        break;
+      case "--chunks":
+        options.chunks = value;
+        break;
+      default:
+        throw new Error(`Unknown option: ${arg}`);
+    }
+
+    index += 1;
+  }
+
+  return {
+    ...options,
+    question: positional.join(" ").trim(),
+  };
 }
 
 function getRetrievalIndexPath(projectRoot: string, repositoryId: string): string {
@@ -148,7 +211,14 @@ function formatSources(
 }
 
 function getPositiveIntegerEnv(name: string, fallback: number): number {
-  const value = process.env[name];
+  return getPositiveIntegerValue(name, process.env[name], fallback);
+}
+
+function getPositiveIntegerValue(
+  name: string,
+  value: string | undefined,
+  fallback: number,
+): number {
   if (!value) {
     return fallback;
   }

@@ -98,20 +98,26 @@ npm run dev -- "What TypeScript files make up this assistant?"
 Run against another local repo:
 
 ```bash
-PROJECT_ROOT=/home/justin/projects/other-repo npm run dev -- "What does this repo do?"
+npm run dev -- --repo /home/justin/projects/other-repo "What does this repo do?"
 ```
 
 The CLI prints the project root, repository id, and retrieval index path before answering so it is clear which repo is being read.
 
-## Debug Prompt
-
-To inspect the exact prompt sent to Ollama, set `DEBUG_PROMPT_PATH`:
+Override models for one run:
 
 ```bash
-DEBUG_PROMPT_PATH=tmp/prompt.txt npm run dev -- "What phase is this project in?"
+npm run dev -- --model qwen2.5-coder:7b --embed-model nomic-embed-text "How is retrieval implemented?"
 ```
 
-The file is only written when `DEBUG_PROMPT_PATH` is set.
+## Debug Prompt
+
+To inspect the exact prompt sent to Ollama, pass `--debug-prompt`:
+
+```bash
+npm run dev -- --debug-prompt tmp/prompt.txt "What phase is this project in?"
+```
+
+The file is only written when `--debug-prompt` or `DEBUG_PROMPT_PATH` is set.
 
 ## Retrieval Settings
 
@@ -127,6 +133,12 @@ CHUNK_OVERLAP_LINES=12
 RETRIEVED_CHUNKS=6
 # Override only when you intentionally want a specific index file.
 # RETRIEVAL_INDEX_PATH=tmp/retrieval-index.json
+```
+
+For one-off runs, prefer CLI flags over changing `.env`:
+
+```bash
+npm run dev -- --chunks 8 "What are the main architectural boundaries?"
 ```
 
 ## Runtime Comparisons
