@@ -117,6 +117,10 @@ CHUNK_OVERLAP_LINES=12
 RETRIEVED_CHUNKS=6
 ```
 
+## Runtime Comparisons
+
+Phase 8 tracks runtime tradeoffs in [docs/runtime-comparisons.md](docs/runtime-comparisons.md). The assistant still uses Ollama as its only implemented runtime while other options are compared on setup, API ergonomics, model support, speed, hardware needs, deployment story, and fit for internal developer tools.
+
 ## Quality Gate
 
 Run the TypeScript and ESLint checks:
@@ -133,4 +137,4 @@ Sources are the retrieved chunks sent to the model, not proof that every listed 
 
 ## Future Phases
 
-Future phases will compare local runtime options like Ollama, llama.cpp, vLLM, and cloud APIs.
+Future phases will decide which developer-tool direction this sandbox should pursue next.
