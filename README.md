@@ -14,10 +14,10 @@ The current prototype proves this flow:
 local files
   -> chunked and embedded retrieval context
   -> local Ollama model
-  -> answer
+  -> answer with sources
 ```
 
-The model does not know the codebase by default. The CLI reads useful project files, chunks them, stores chunk embeddings in a local JSON index, retrieves chunks relevant to the question, sends those chunks to Ollama as prompt context, and prints the generated response.
+The model does not know the codebase by default. The CLI reads useful project files, chunks them, stores chunk embeddings in a local JSON index, retrieves chunks relevant to the question, sends those chunks to Ollama as prompt context, and prints the generated response with the retrieved chunks listed as sources.
 
 ## Current Tool
 
@@ -34,6 +34,7 @@ It can:
 * build a grounded prompt from retrieved context
 * call an Ollama model through `OLLAMA_BASE_URL`
 * answer questions using retrieved local context
+* list the retrieved source chunks that informed the answer
 
 ## Setup
 
@@ -126,10 +127,10 @@ npm run check
 
 ## Current Limitations
 
-The assistant uses basic JSON-backed retrieval, not a production vector database. It does not yet include source citations, agents, tool calling, auth, or a UI.
+The assistant uses basic JSON-backed retrieval, not a production vector database. It does not include agents, tool calling, auth, or a UI.
 
-This means answer quality depends on chunk size, embedding quality, and whether the relevant chunks rank highly enough to fit into the prompt.
+Sources are the retrieved chunks sent to the model, not proof that every listed chunk was used in the final wording. Answer quality depends on chunk size, embedding quality, and whether the relevant chunks rank highly enough to fit into the prompt.
 
 ## Future Phases
 
-Future phases will make retrieved answers traceable to source files and compare local runtime options like Ollama, llama.cpp, vLLM, and cloud APIs.
+Future phases will compare local runtime options like Ollama, llama.cpp, vLLM, and cloud APIs.

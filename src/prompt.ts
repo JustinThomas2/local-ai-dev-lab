@@ -23,7 +23,7 @@ export function buildPrompt(files: ProjectFile[], question: string): string {
     "Do not suggest code, commands, implementation steps, or file changes unless the user explicitly asks for them.",
     "Do not restate or summarize large sections of the provided files.",
     "Return only the direct answer. Do not repeat the prompt, include examples, or output code.",
-    "Do not include source citations or a Sources section.",
+    "Do not include source citations or a Sources section; the CLI appends sources separately.",
     "",
     "Provided files:",
     formattedFiles,

@@ -68,6 +68,8 @@ async function main(): Promise<void> {
   console.log(`Embedding model: ${embeddingModel}`);
   console.log("");
   console.log(answer.trim());
+  console.log("");
+  console.log(formatSources(retrievalResults));
 }
 
 async function writeDebugPrompt(prompt: string): Promise<void> {
@@ -91,6 +93,20 @@ function getOllamaBaseUrl(): string {
       "Example: OLLAMA_BASE_URL=http://127.0.0.1:11434 npm run dev",
     ].join(" "),
   );
+}
+
+function formatSources(
+  retrievalResults: Awaited<ReturnType<typeof retrieveRelevantChunks>>,
+): string {
+  const sources = Array.from(
+    new Set(
+      retrievalResults.map(
+        ({ chunk }) => `${chunk.path}#L${chunk.startLine}-L${chunk.endLine}`,
+      ),
+    ),
+  );
+
+  return ["Sources:", ...sources.map((source) => `- ${source}`)].join("\n");
 }
 
 function getPositiveIntegerEnv(name: string, fallback: number): number {
