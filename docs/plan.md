@@ -207,7 +207,7 @@ This phase should still avoid embeddings and vector search.
 
 ## Phase 6: Embeddings and Retrieval
 
-Status: In Progress
+Status: Done
 
 Goal: move from “send selected files” to basic retrieval.
 
@@ -234,7 +234,7 @@ Possible embedding options:
 
 ## Phase 7: Source Citations
 
-Status: Not started
+Status: In Progress
 
 Goal: make answers traceable back to source files.
 
