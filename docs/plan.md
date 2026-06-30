@@ -2,6 +2,8 @@
 
 This is the current source of truth for project direction, sequencing, and scope.
 
+Current active phase: Lightweight Evals.
+
 The completed first planning arc is archived in [docs/plans/01-foundation.md](plans/01-foundation.md). That arc proved a local codebase assistant using Ollama, local generation, local embeddings, chunked retrieval, source output, and runtime tradeoff documentation.
 
 ## Current Purpose
@@ -38,9 +40,9 @@ Near-term success means the CLI can be pointed at another local repo, build or r
 
 The strongest product direction is still local codebase Q&A evolving into an architecture explainer. Onboarding help, dependency boundary explanation, migration planning, and PR review can come later once the core retrieval answers are more reliable.
 
-## Current Phase: Repo-Agnostic Assistant
+## Recently Completed: Repo-Agnostic Assistant
 
-Status: In Progress
+Status: Done
 
 Goal: make the assistant work reliably against local repositories other than this one.
 
@@ -58,9 +60,31 @@ Expected work:
 * make stale or mismatched indexes easy to understand
 * validate with at least one real question against another local repo when practical
 
+Outcome:
+
+* `PROJECT_ROOT` is documented for running against another local repo
+* default retrieval indexes are derived from the target repo path
+* retrieval index metadata includes a repository id
+* CLI output shows the project root, repository id, index path, and rebuild reasons
+
+## Current Phase: Lightweight Evals
+
+Status: In Progress
+
+Goal: create a small set of real questions that can be reused across retrieval, prompt, and model changes.
+
+This phase should answer:
+
+* Which questions should be used to check assistant behavior repeatedly?
+* What answer traits matter more than exact wording?
+* How should model swaps in Ollama be compared without making benchmark claims?
+* Where should notes about retrieval misses and model behavior live?
+
 ## Next Major Phases
 
 ### Phase 1: Repo-Agnostic Usage
+
+Status: Done
 
 Make the assistant easy to run against other local repositories.
 
@@ -71,6 +95,8 @@ Possible improvements:
 * validate against at least one repo outside `local-ai-dev-lab`
 
 ### Phase 2: Multi-Repo Index Handling
+
+Status: Done
 
 Make retrieval storage safe and predictable across multiple repos.
 
@@ -83,6 +109,8 @@ Possible improvements:
 * keep JSON storage unless it becomes a real limitation
 
 ### Phase 3: Lightweight Evals
+
+Status: In Progress
 
 Create a small set of real questions that can be reused across retrieval, prompt, and model changes.
 
@@ -106,6 +134,8 @@ Good initial questions:
 
 ### Phase 4: Retrieval Quality and Answer Structure
 
+Status: Not started
+
 Improve answer usefulness before adding new capabilities.
 
 Possible improvements:
@@ -116,6 +146,8 @@ Possible improvements:
 * make answers clearer about missing context
 
 ### Phase 5: Runtime and Model Learning Through the Assistant
+
+Status: Not started
 
 Use the assistant workflow to learn local/self-hosted model behavior.
 
@@ -131,6 +163,8 @@ Possible work:
 Do not make benchmarking claims without real measurements.
 
 ### Phase 6: Planning and Patch Suggestions
+
+Status: Not started
 
 Only after the assistant is reliable for repo Q&A, consider developer workflows that move toward coding-agent behavior.
 

@@ -18,6 +18,7 @@ export type EmbeddedChunk = ProjectChunk & {
 export type RetrievalIndex = {
   version: number;
   rootDirectory: string;
+  repositoryId: string;
   embeddingModel: string;
   chunkSizeLines: number;
   chunkOverlapLines: number;

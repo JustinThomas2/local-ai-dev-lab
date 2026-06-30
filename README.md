@@ -58,7 +58,7 @@ Example `.env`:
 OLLAMA_BASE_URL=http://127.0.0.1:11434
 OLLAMA_MODEL=llama3.2
 OLLAMA_EMBED_MODEL=nomic-embed-text
-RETRIEVAL_INDEX_PATH=tmp/retrieval-index.json
+PROJECT_ROOT=.
 ```
 
 When running the CLI from WSL while Ollama is running on Windows, `localhost` may not point to the Windows Ollama server. In that case, get the Windows host IP from WSL:
@@ -95,6 +95,14 @@ Ask a custom question:
 npm run dev -- "What TypeScript files make up this assistant?"
 ```
 
+Run against another local repo:
+
+```bash
+PROJECT_ROOT=/home/justin/projects/other-repo npm run dev -- "What does this repo do?"
+```
+
+The CLI prints the project root, repository id, and retrieval index path before answering so it is clear which repo is being read.
+
 ## Debug Prompt
 
 To inspect the exact prompt sent to Ollama, set `DEBUG_PROMPT_PATH`:
@@ -107,7 +115,9 @@ The file is only written when `DEBUG_PROMPT_PATH` is set.
 
 ## Retrieval Settings
 
-The assistant stores embeddings in `tmp/retrieval-index.json` by default. It rebuilds the index when useful file contents, the embedding model, or chunk settings change.
+The assistant stores embeddings in `tmp/retrieval-indexes/` by default. The default index filename is derived from the target `PROJECT_ROOT`, so different local repos do not share the same retrieval index.
+
+It rebuilds the index when useful file contents, the target repo, the embedding model, or chunk settings change. When it rebuilds, the CLI prints the reason.
 
 Optional settings:
 
@@ -115,17 +125,19 @@ Optional settings:
 CHUNK_SIZE_LINES=80
 CHUNK_OVERLAP_LINES=12
 RETRIEVED_CHUNKS=6
+# Override only when you intentionally want a specific index file.
+# RETRIEVAL_INDEX_PATH=tmp/retrieval-index.json
 ```
 
 ## Runtime Comparisons
 
-Phase 8 tracks runtime tradeoffs in [docs/runtime-comparisons.md](docs/runtime-comparisons.md). The assistant still uses Ollama as its only implemented runtime while other options are compared on setup, API ergonomics, model support, speed, hardware needs, deployment story, and fit for internal developer tools.
+Phase 8 documents runtime tradeoffs in [docs/runtime-comparisons.md](docs/runtime-comparisons.md). The assistant still uses Ollama as its only implemented runtime while other options are compared on setup, API ergonomics, model support, speed, hardware needs, deployment story, and fit for internal developer tools.
 
 ## Planning
 
 The active plan lives in [docs/plan.md](docs/plan.md). Completed planning arcs are archived under [docs/plans/](docs/plans/), starting with [docs/plans/01-foundation.md](docs/plans/01-foundation.md).
 
-The current direction is to make the assistant repo-agnostic and more useful against other local repositories before adding agent behavior.
+The current direction is to add lightweight evals so retrieval, prompt, and model changes can be compared against the same real questions before adding agent behavior.
 
 ## Quality Gate
 

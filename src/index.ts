@@ -1,5 +1,6 @@
 import "dotenv/config";
 
+import { createHash } from "node:crypto";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { readUsefulProjectFiles } from "./fileReader";
@@ -19,13 +20,12 @@ const defaultChunkOverlapLines = 12;
 const defaultRetrievedChunks = 6;
 
 async function main(): Promise<void> {
-  const projectRoot = path.resolve(process.env.PROJECT_ROOT ?? process.cwd());
+  const projectRoot = normalizeProjectRoot(process.env.PROJECT_ROOT);
   const model = process.env.OLLAMA_MODEL ?? "llama3.2";
   const embeddingModel = process.env.OLLAMA_EMBED_MODEL ?? defaultEmbeddingModel;
   const baseUrl = getOllamaBaseUrl();
-  const indexPath = path.resolve(
-    process.env.RETRIEVAL_INDEX_PATH ?? path.join(process.cwd(), "tmp", "retrieval-index.json"),
-  );
+  const repositoryId = getRepositoryId(projectRoot);
+  const indexPath = getRetrievalIndexPath(projectRoot, repositoryId);
   const chunkSizeLines = getPositiveIntegerEnv("CHUNK_SIZE_LINES", defaultChunkSizeLines);
   const chunkOverlapLines = getNonNegativeIntegerEnv(
     "CHUNK_OVERLAP_LINES",
@@ -39,20 +39,29 @@ async function main(): Promise<void> {
   }
 
   const files = await readUsefulProjectFiles(projectRoot);
-  console.log(`Read ${files.length} useful files from ${projectRoot}`);
+  console.log(`Project root: ${projectRoot}`);
+  console.log(`Repository id: ${repositoryId}`);
+  console.log(`Retrieval index: ${indexPath}`);
+  console.log(`Read ${files.length} useful files`);
 
   const embed = (text: string): Promise<number[]> =>
     embedWithOllama({ baseUrl, model: embeddingModel, prompt: text });
-  const { index, rebuilt } = await loadOrBuildRetrievalIndex({
+  const { index, rebuilt, rebuildReasons } = await loadOrBuildRetrievalIndex({
     indexPath,
     files,
     rootDirectory: projectRoot,
+    repositoryId,
     embeddingModel,
     chunkSizeLines,
     chunkOverlapLines,
     embed,
   });
-  console.log(`${rebuilt ? "Built" : "Loaded"} retrieval index with ${index.chunks.length} chunks`);
+  console.log(
+    `${rebuilt ? "Built" : "Loaded"} retrieval index with ${index.chunks.length} chunks`,
+  );
+  if (rebuilt) {
+    console.log(`Rebuild reasons: ${formatRebuildReasons(rebuildReasons)}`);
+  }
 
   const retrievalResults = await retrieveRelevantChunks(index, question, embed, retrievedChunks);
   console.log("Retrieved chunks:");
@@ -93,6 +102,35 @@ function getOllamaBaseUrl(): string {
       "Example: OLLAMA_BASE_URL=http://127.0.0.1:11434 npm run dev",
     ].join(" "),
   );
+}
+
+function normalizeProjectRoot(projectRoot: string | undefined): string {
+  return path.resolve(projectRoot ?? process.cwd());
+}
+
+function getRetrievalIndexPath(projectRoot: string, repositoryId: string): string {
+  if (process.env.RETRIEVAL_INDEX_PATH) {
+    return path.resolve(process.env.RETRIEVAL_INDEX_PATH);
+  }
+
+  return path.join(
+    process.cwd(),
+    "tmp",
+    "retrieval-indexes",
+    `${path.basename(projectRoot)}-${repositoryId}.json`,
+  );
+}
+
+function getRepositoryId(projectRoot: string): string {
+  return createHash("sha256").update(projectRoot).digest("hex").slice(0, 12);
+}
+
+function formatRebuildReasons(rebuildReasons: string[]): string {
+  if (rebuildReasons.length === 0) {
+    return "none";
+  }
+
+  return rebuildReasons.join(", ");
 }
 
 function formatSources(

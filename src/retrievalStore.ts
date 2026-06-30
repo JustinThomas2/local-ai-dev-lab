@@ -6,6 +6,7 @@ import type { EmbeddedChunk, ProjectChunk, ProjectFile, RetrievalIndex } from ".
 
 type BuildRetrievalIndexOptions = ChunkFilesOptions & {
   rootDirectory: string;
+  repositoryId: string;
   embeddingModel: string;
   embed: (text: string) => Promise<number[]>;
 };
@@ -20,34 +21,50 @@ type SearchResult = {
   score: number;
 };
 
-const indexVersion = 1;
+const indexVersion = 2;
+
+type IndexMismatchReason =
+  | "missing"
+  | "version"
+  | "rootDirectory"
+  | "repositoryId"
+  | "embeddingModel"
+  | "chunkSizeLines"
+  | "chunkOverlapLines"
+  | "filesHash";
 
 export async function loadOrBuildRetrievalIndex({
   indexPath,
   files,
   rootDirectory,
+  repositoryId,
   embeddingModel,
   chunkSizeLines,
   chunkOverlapLines,
   embed,
-}: LoadOrBuildRetrievalIndexOptions): Promise<{ index: RetrievalIndex; rebuilt: boolean }> {
+}: LoadOrBuildRetrievalIndexOptions): Promise<{
+  index: RetrievalIndex;
+  rebuilt: boolean;
+  rebuildReasons: IndexMismatchReason[];
+}> {
   const filesHash = hashFiles(files);
   const cachedIndex = await readCachedIndex(indexPath);
+  const rebuildReasons = getIndexMismatchReasons(cachedIndex, {
+    rootDirectory,
+    repositoryId,
+    embeddingModel,
+    chunkSizeLines,
+    chunkOverlapLines,
+    filesHash,
+  });
 
-  if (
-    cachedIndex &&
-    cachedIndex.version === indexVersion &&
-    cachedIndex.rootDirectory === rootDirectory &&
-    cachedIndex.embeddingModel === embeddingModel &&
-    cachedIndex.chunkSizeLines === chunkSizeLines &&
-    cachedIndex.chunkOverlapLines === chunkOverlapLines &&
-    cachedIndex.filesHash === filesHash
-  ) {
-    return { index: cachedIndex, rebuilt: false };
+  if (cachedIndex && rebuildReasons.length === 0) {
+    return { index: cachedIndex, rebuilt: false, rebuildReasons };
   }
 
   const index = await buildRetrievalIndex(files, {
     rootDirectory,
+    repositoryId,
     embeddingModel,
     chunkSizeLines,
     chunkOverlapLines,
@@ -57,7 +74,7 @@ export async function loadOrBuildRetrievalIndex({
   await mkdir(path.dirname(indexPath), { recursive: true });
   await writeFile(indexPath, `${JSON.stringify(index, null, 2)}\n`);
 
-  return { index, rebuilt: true };
+  return { index, rebuilt: true, rebuildReasons };
 }
 
 export async function retrieveRelevantChunks(
@@ -88,6 +105,7 @@ async function buildRetrievalIndex(
   files: ProjectFile[],
   {
     rootDirectory,
+    repositoryId,
     embeddingModel,
     chunkSizeLines,
     chunkOverlapLines,
@@ -107,12 +125,61 @@ async function buildRetrievalIndex(
   return {
     version: indexVersion,
     rootDirectory,
+    repositoryId,
     embeddingModel,
     chunkSizeLines,
     chunkOverlapLines,
     filesHash: hashFiles(files),
     chunks: embeddedChunks,
   };
+}
+
+function getIndexMismatchReasons(
+  cachedIndex: RetrievalIndex | undefined,
+  expected: {
+    rootDirectory: string;
+    repositoryId: string;
+    embeddingModel: string;
+    chunkSizeLines: number;
+    chunkOverlapLines: number;
+    filesHash: string;
+  },
+): IndexMismatchReason[] {
+  if (!cachedIndex) {
+    return ["missing"];
+  }
+
+  const reasons: IndexMismatchReason[] = [];
+
+  if (cachedIndex.version !== indexVersion) {
+    reasons.push("version");
+  }
+
+  if (cachedIndex.rootDirectory !== expected.rootDirectory) {
+    reasons.push("rootDirectory");
+  }
+
+  if (cachedIndex.repositoryId !== expected.repositoryId) {
+    reasons.push("repositoryId");
+  }
+
+  if (cachedIndex.embeddingModel !== expected.embeddingModel) {
+    reasons.push("embeddingModel");
+  }
+
+  if (cachedIndex.chunkSizeLines !== expected.chunkSizeLines) {
+    reasons.push("chunkSizeLines");
+  }
+
+  if (cachedIndex.chunkOverlapLines !== expected.chunkOverlapLines) {
+    reasons.push("chunkOverlapLines");
+  }
+
+  if (cachedIndex.filesHash !== expected.filesHash) {
+    reasons.push("filesHash");
+  }
+
+  return reasons;
 }
 
 async function readCachedIndex(indexPath: string): Promise<RetrievalIndex | undefined> {
